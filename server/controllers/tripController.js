@@ -27,7 +27,32 @@ const createTrip = async (req, res) => {
   }
 };
 
+// DELETE /api/trips/:id
+const deleteTrip = async (req, res) => {
+  try {
+    await Trip.findByIdAndDelete(req.params.id);
+    res.json({ message: "Trip deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const updateTrip = async (req, res) => {
+  try {
+    const updatedTrip = await Trip.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    res.json(updatedTrip);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update trip" });
+  }
+};
+
+
 module.exports = {
   getTrips,
   createTrip,
+  deleteTrip,
+  updateTrip
 };
