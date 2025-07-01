@@ -1,82 +1,132 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from "react";
 
 function TripForm({ onTripCreated, editingTrip, onEditComplete }) {
-  const [formData, setFormData] = useState({
-    title: '',
-    destination: '',
-    startDate: '',
-    endDate: '',
-    members: '',
-    notes: '',
-  });
+  const [title, setTitle] = useState("");
+  const [destination, setDestination] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [members, setMembers] = useState("");
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     if (editingTrip) {
-      setFormData(editingTrip);
+      setTitle(editingTrip.title || "");
+      setDestination(editingTrip.destination || "");
+      setStartDate(editingTrip.startDate?.slice(0, 10) || "");
+      setEndDate(editingTrip.endDate?.slice(0, 10) || "");
+      setMembers(editingTrip.members || "");
+      setNotes(editingTrip.notes || "");
     } else {
-      resetForm();
+      clearForm();
     }
   }, [editingTrip]);
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      destination: '',
-      startDate: '',
-      endDate: '',
-      members: '',
-      notes: '',
-    });
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const clearForm = () => {
+    setTitle("");
+    setDestination("");
+    setStartDate("");
+    setEndDate("");
+    setMembers("");
+    setNotes("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const url = editingTrip
-      ? `http://localhost:5000/api/trips/${editingTrip._id}`
-      : "http://localhost:5000/api/trips";
-
-    const method = editingTrip ? "PUT" : "POST";
+    const trip = { title, destination, startDate, endDate, members, notes };
 
     try {
+      const url = editingTrip
+        ? `http://localhost:5000/api/trips/${editingTrip._id}`
+        : "http://localhost:5000/api/trips";
+      const method = editingTrip ? "PUT" : "POST";
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(trip),
       });
 
       if (res.ok) {
-        const result = await res.json();
-        alert(editingTrip ? "✏️ Trip updated!" : "✅ Trip saved!");
-        resetForm();
-        if (editingTrip && onEditComplete) {
-          onEditComplete(result);
-        } else {
-          onTripCreated(result);
-        }
+        clearForm();
+        editingTrip ? onEditComplete() : onTripCreated();
       } else {
-        alert("❌ Failed to submit form.");
+        alert("Failed to save trip.");
       }
     } catch (err) {
-      console.error("Error submitting form:", err);
+      console.error("Error saving trip:", err);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-3xl mx-auto mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input name="title" value={formData.title} onChange={handleChange} placeholder="Trip Title" className="input" required />
-        <input name="destination" value={formData.destination} onChange={handleChange} placeholder="Destination" className="input" required />
-        <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} className="input" required />
-        <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} className="input" required />
-        <input name="members" value={formData.members} onChange={handleChange} placeholder="Participants" className="input" />
-        <input name="notes" value={formData.notes} onChange={handleChange} placeholder="Notes" className="input" />
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-6 rounded-xl shadow-md max-w-3xl mx-auto mb-10"
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label className="text-sm text-gray-500">Trip Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="input-style"
+            required
+          />
+        </div>
+        <div>
+          <label className="text-sm text-gray-500">Destination</label>
+          <input
+            type="text"
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+            className="input-style"
+            required
+          />
+        </div>
+        <div>
+          <label className="text-sm text-gray-500">Start Date</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="input-style"
+            required
+          />
+        </div>
+        <div>
+          <label className="text-sm text-gray-500">End Date</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="input-style"
+            required
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="text-sm text-gray-500">Participants</label>
+          <input
+            type="text"
+            value={members}
+            onChange={(e) => setMembers(e.target.value)}
+            className="input-style"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="text-sm text-gray-500">Notes</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="input-style"
+            rows={2}
+          />
+        </div>
       </div>
-      <button type="submit" className="mt-4 w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+
+      <button
+        type="submit"
+        className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-all duration-200 font-medium"
+      >
         {editingTrip ? "✏️ Update Trip" : "➕ Save Trip"}
       </button>
     </form>
@@ -84,4 +134,3 @@ function TripForm({ onTripCreated, editingTrip, onEditComplete }) {
 }
 
 export default TripForm;
-

@@ -2,10 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-gray-50;
+.input-style {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  margin-top: 0.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
 }
 
-.input {
-  @apply border border-gray-300 rounded px-3 py-2 w-full;
+.input-style:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px #c7d2fe;
 }
+
+/* Optional: smooth fonts and transition */
+body {
+  @apply transition-all duration-300 font-sans;
+}
+

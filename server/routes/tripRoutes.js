@@ -1,13 +1,27 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { getTrips, createTrip, deleteTrip, updateTrip } = require("../controllers/tripController");
-router.post("/test", (req, res) => {
-  res.json({ message: "Test route working!" });
+const protect = require('../middleware/authMiddleware');
+const Trip = require('../models/trip');
+
+// Example: Get all trips for logged-in user
+router.get('/', protect, async (req, res) => {
+  const trips = await Trip.find({ user: req.user._id });
+  res.json(trips);
 });
 
-router.get("/", getTrips);       // GET /api/trips → Get all trips
-router.post("/", createTrip);    // POST /api/trips → Create a trip
-router.delete("/:id", deleteTrip);
-router.put("/:id", updateTrip); 
+// Add `user` field in new trip
+router.post('/', protect, async (req, res) => {
+  const { title, destination, startDate, endDate } = req.body;
+  const trip = new Trip({
+    title,
+    destination,
+    startDate,
+    endDate,
+    user: req.user._id
+  });
+  await trip.save();
+  res.status(201).json(trip);
+});
 
 module.exports = router;
+
